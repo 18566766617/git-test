@@ -12,9 +12,9 @@ public class OBOJNI {
     static {
         try {
             System.loadLibrary("testjni");//libtestjni.so
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            Log.e("tag",e.getMessage());
+            Log.e("tag", e.getMessage());
         }
 
     }
@@ -47,5 +47,7 @@ public class OBOJNI {
     //登陆的jni接口login
     public native boolean login(String username, String passwd, boolean isDriver);
 
+
+    public native boolean mylogin(String username, String passwd, boolean isDriver);
 
 }

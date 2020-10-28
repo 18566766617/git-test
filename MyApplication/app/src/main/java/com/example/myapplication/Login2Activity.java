@@ -77,13 +77,13 @@ public class Login2Activity extends AppCompatActivity {
                 }
 
                 // 将用户名和密码发送给远程服务器 得到一个登陆结果 放在login_res
-                login_res = OBOJNI.getInstance().login(username, passwd, isDriver);
-
+                login_res = OBOJNI.getInstance().login(username, passwd, isDriver);  //ok调通了
+                //login_res = OBOJNI.getInstance().mylogin(username, passwd, isDriver);  ok调通了
 
                 if (login_res == true) {
                     //登陆成功
                     Log.e(Tag, "登陆成功 username = " + username + ", passwd = " + passwd);
-                    Log.e(Tag, "当前用户的角色是 " + ((isDriver == true) ? "司机" : "乘客"));
+                    //Log.e(Tag, "当前用户的角色是 " + ((isDriver == true) ? "司机" : "乘客"));
 
 
                     //1 定义一个跳转的对象

@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.myapplication">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,16 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".JNITestActivity">
-
-        </activity>
-
-        <activity android:name=".DriverActivity">
-
-        </activity>
-
+        <activity android:name=".JNITestActivity"></activity>
+        <activity android:name=".DriverActivity"></activity>
         <activity android:name=".Login2Activity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,16 +24,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".RegActivity">
-
-        </activity>
-
-        <activity android:name=".PassengerActivity">
-
-        </activity>
-
-        <activity android:name=".LoginActivity">
+        <activity android:name=".RegActivity"></activity>
+        <activity android:name=".PassengerActivity"></activity>
+        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".MainActivity">
 
         </activity>
     </application>

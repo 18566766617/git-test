@@ -63,6 +63,14 @@ JNIEXPORT void JNICALL Java_com_example_myapplication_OBOJNI_test_1jni_1api4_1ar
 JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_login
   (JNIEnv *, jobject, jstring, jstring, jboolean);
 
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    mylogin
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Z)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_mylogin
+  (JNIEnv *, jobject, jstring, jstring, jboolean);
+
 #ifdef __cplusplus
 }
 #endif
