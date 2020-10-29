@@ -65,6 +65,14 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_login
 
 /*
  * Class:     com_example_myapplication_OBOJNI
+ * Method:    reg
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_reg
+  (JNIEnv *, jobject, jstring, jstring, jstring, jstring, jstring, jboolean);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
  * Method:    mylogin
  * Signature: (Ljava/lang/String;Ljava/lang/String;Z)Z
  */

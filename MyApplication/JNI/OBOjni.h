@@ -19,15 +19,19 @@
 #include<netinet/in.h>
 //ip地址的转换函数
 #include<arpa/inet.h>
-
 #include <sys/stat.h>
 
 
-
 #include <android/log.h>
+
+#include "cJSON.h"
 #include <curl/curl.h>
 #include "com_example_myapplication_OBOJNI.h"
-#include "cJSON.h"
 
-#define TAG "JNI"
+
+#include "Json.h"
+#include "Curl.h"
+
+#define TAG "tag"
+
 #endif

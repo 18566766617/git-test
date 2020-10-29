@@ -27,16 +27,6 @@ public class RegActivity extends AppCompatActivity {
 
     String Tag = "Activity";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reg);
-
-        initUI();
-
-
-        bindUIEvent();
-    }
 
     protected  void initUI() {
         et_username = (EditText)findViewById(R.id.et_username_reg);
@@ -93,6 +83,10 @@ public class RegActivity extends AppCompatActivity {
 
 
                 //将全部信息 发送给远程服务器   会送服务器得到一个结果 放在reg_result
+                reg_result = OBOJNI.getInstance().reg(username,passwd1,
+                        email, phone, idCard, isDriver);
+
+
 
                 if (reg_result == true) {
                     //注册成功
@@ -128,5 +122,15 @@ public class RegActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_reg);
+
+        initUI();
+
+
+        bindUIEvent();
+    }
 
 }

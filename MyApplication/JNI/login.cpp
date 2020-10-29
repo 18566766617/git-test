@@ -78,7 +78,10 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_login
 
     //(2) 想web服务器 发送http请求 其中post数据 json字符串
     //1 设置curl url
-    curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.0.4:7777/login");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://192.168.0.4:7777/login");
+    //客户端忽略CA证书认证
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, false);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
     //2 开启post请求开关
     curl_easy_setopt(curl, CURLOPT_POST, true);
     //3 添加post数据
