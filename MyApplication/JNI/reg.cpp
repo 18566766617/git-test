@@ -60,7 +60,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_reg
 
 
     //向远程服务器发送请求
-    Curl  curl("http://192.168.0.4:7777/reg", true);
+    Curl  curl("https://192.168.0.4:7777/reg", true);
 
     if(curl.execute(json_str) == false) {
         __android_log_print(ANDROID_LOG_ERROR,TAG,"JNI-reg:curl.excute error\n");
