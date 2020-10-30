@@ -37,7 +37,7 @@ android {
         main {
             jniLibs {
                 //将生成的so放到这个目录下
-                srcDirs = ['../libs']
+                srcDirs = ['../libs','GaoDeLibs']
             }
         }
     }
