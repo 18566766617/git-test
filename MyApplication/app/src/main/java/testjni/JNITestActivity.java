@@ -1,5 +1,6 @@
-package com.example.myapplication;
+package testjni;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -7,24 +8,31 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.myapplication.OBOJNI;
+import com.example.myapplication.R;
+
+import testsocket.TestTcpActivity;
+
 public class JNITestActivity extends AppCompatActivity {
 
     private Button bt_jni_test1 = null;
     private Button bt_jni_test2 = null;
     private Button bt_jni_test3 = null;
     private Button bt_jni_test4 = null;
-
+    private Button bt_jni_test5 = null;
+    private Button bt_jni_test6 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_jnitest);
 
-        bt_jni_test1 = (Button)findViewById(R.id.bt_jni_test1);
-        bt_jni_test2 = (Button)findViewById(R.id.bt_jni_test2);
-        bt_jni_test3 = (Button)findViewById(R.id.bt_jni_test3);
-        bt_jni_test4 = (Button)findViewById(R.id.bt_jni_test4);
-
+        bt_jni_test1 = (Button) findViewById(R.id.bt_jni_test1);
+        bt_jni_test2 = (Button) findViewById(R.id.bt_jni_test2);
+        bt_jni_test3 = (Button) findViewById(R.id.bt_jni_test3);
+        bt_jni_test4 = (Button) findViewById(R.id.bt_jni_test4);
+        bt_jni_test5 = (Button) findViewById(R.id.bt_jni_test5);
+        bt_jni_test6 = (Button) findViewById(R.id.bt_jni_test6);
 
         bt_jni_test1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -37,8 +45,8 @@ public class JNITestActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //调用传参int的jni接口
-                int ret_int = OBOJNI.getInstance().test_jni_api(100,200);
-                Log.e("testjni", "java: ret_int = "+ ret_int);
+                int ret_int = OBOJNI.getInstance().test_jni_api(100, 200);
+                Log.e("testjni", "java: ret_int = " + ret_int);
             }
         });
 
@@ -46,7 +54,7 @@ public class JNITestActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean flag = OBOJNI.getInstance().test_jni_api2(true);
-                Log.e("testjni", "java: bool = "+ flag);
+                Log.e("testjni", "java: bool = " + flag);
             }
         });
 
@@ -55,11 +63,22 @@ public class JNITestActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String ret_string = OBOJNI.getInstance().test_jni_api3("Java:gailun", "Java:Yase");
                 Log.e("testjni", "java: ret_string = " + ret_string);
+            }
+        });
 
-
+        bt_jni_test5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 //测试数组jni接口
-                int[] iList = {1,2,3,4,5};
+                int[] iList = {1, 2, 3, 4, 5};
                 OBOJNI.getInstance().test_jni_api4_array(iList);
+            }
+        });
+
+        bt_jni_test6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(JNITestActivity.this, TestTcpActivity.class));
             }
         });
 

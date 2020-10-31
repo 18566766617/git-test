@@ -5,7 +5,7 @@
 #include "OBOjni.h"
 
 
-JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_reg
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_Reg
         (JNIEnv *env, jobject obj, jstring j_username, jstring j_passwd, jstring j_email,
          jstring j_phone, jstring j_idCard, jboolean j_isDriver)
 {
@@ -46,7 +46,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_reg
     string json_str = json.print();
 
 
-    __android_log_print(ANDROID_LOG_ERROR,TAG,"JNI-reg: post_str = [%s]\n", json_str.c_str());
+    __android_log_print(ANDROID_LOG_ERROR,jniLogTag,"JNI-reg: post_str = [%s]\n", json_str.c_str());
 
 
 
@@ -63,7 +63,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_reg
     Curl  curl("https://192.168.0.4:7777/reg", true);
 
     if(curl.execute(json_str) == false) {
-        __android_log_print(ANDROID_LOG_ERROR,TAG,"JNI-reg:curl.excute error\n");
+        __android_log_print(ANDROID_LOG_ERROR,jniLogTag,"JNI-reg:curl.excute error\n");
         return JNI_FALSE;
     }
 
@@ -97,7 +97,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_reg
     string result = json_res.value("result");
     if (result == "ok") {
         //注册成功
-        __android_log_print(ANDROID_LOG_ERROR,TAG,"JNI-reg:reg succ!!\n");
+        __android_log_print(ANDROID_LOG_ERROR,jniLogTag,"JNI-reg:reg succ!!\n");
 
         return JNI_TRUE;
     }
@@ -106,12 +106,12 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_reg
         string reason = json_res.value("reason");
         if(reason == "") {
             //未知错误
-            __android_log_print(ANDROID_LOG_ERROR,TAG,"JNI-reg:reg fali!! reason unknow\n");
+            __android_log_print(ANDROID_LOG_ERROR,jniLogTag,"JNI-reg:reg fali!! reason unknow\n");
 
         }
         else {
             //已知错误
-            __android_log_print(ANDROID_LOG_ERROR,TAG,"JNI-reg:reg fali!! reason %s\n", reason.c_str());
+            __android_log_print(ANDROID_LOG_ERROR,jniLogTag,"JNI-reg:reg fali!! reason %s\n", reason.c_str());
 
         }
 

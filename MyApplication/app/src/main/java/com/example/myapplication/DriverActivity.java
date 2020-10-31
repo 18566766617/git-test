@@ -1,17 +1,10 @@
 package com.example.myapplication;
 
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -27,37 +20,24 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 public class DriverActivity extends AppCompatActivity {
-    String[] permissions = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION};
-
-    private int requestCode = 1;
-
-
     //创建一个地图容器MapView对象
     private MapView _mapView = null;
     //地图的UISetting对象 给amap设置地图内嵌控件
     private UiSettings _uiSettings = null;
     //地图对象
     private AMap _amap = null;
-
     //定位服务器客户端句柄
     private AMapLocationClient _amapLocationClient = null;
     //定位服务器客户端句柄属性
     private AMapLocationClientOption _amapLocationOption = null;
-
     //显示自我位置的图标
     private Marker _selfMarker = null;
 
 
     boolean isAddSelfMarker = false;
+
     int flag = 0;
     int traffic_flag = 0;
 
@@ -66,7 +46,6 @@ public class DriverActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver);
-        getPermissions();
 
         initUI();
         createMap(savedInstanceState);
@@ -74,26 +53,7 @@ public class DriverActivity extends AppCompatActivity {
 
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    private void getPermissions() {
 
-        List<String> deniedPermissions = new ArrayList<>();
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
-                deniedPermissions.add(permission);
-            }
-        }
-
-
-        if (deniedPermissions.size() > 0) {
-            //没有授权过，去申请一下
-            requestPermissions(deniedPermissions.toArray(new String[deniedPermissions.size()]), requestCode);
-        } else {
-            Log.e("tag", "权限都已申请2");
-        }
-
-
-    }
 
     protected void initUI() {
         //将地图容器跟MapView控件相关联
@@ -152,10 +112,10 @@ public class DriverActivity extends AppCompatActivity {
 
                     if (aMapLocation.getErrorCode() == 0) {
                         //定位成功，aMapLocation获取数据
-                        Log.e("Amap", "location succ address = " + aMapLocation.getAddress());
-                        Log.e("Amap", "city = " + aMapLocation.getCity());
-                        Log.e("Amap", "longtitude = " + aMapLocation.getLongitude());
-                        Log.e("Amap", "latitude = " + aMapLocation.getLatitude());
+                        Log.e("tag", "location succ address = " + aMapLocation.getAddress());
+                        Log.e("tag", "city = " + aMapLocation.getCity());
+                        Log.e("tag", "longtitude = " + aMapLocation.getLongitude());
+                        Log.e("tag", "latitude = " + aMapLocation.getLatitude());
 
                         if (isAddSelfMarker == false) {
                             //在此位置添加一个标记
@@ -226,35 +186,4 @@ public class DriverActivity extends AppCompatActivity {
         _mapView.onDestroy();
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode != -1 && requestCode == requestCode) {
-
-            boolean isVerifyPermission = false;//验证所有权限是否都已经授权
-            for (String permission : permissions) {
-                Log.e("tag", "permissions:" + permission);
-            }
-            for (int grantResult : grantResults) {
-                if (grantResult != PackageManager.PERMISSION_GRANTED) {
-                    isVerifyPermission = false;
-                } else {
-                    isVerifyPermission = true;
-                }
-
-            }
-            if (isVerifyPermission) {
-                //都授权了，执行初始化控件动作
-                Log.e("tag", "权限都已申请1");
-            } else {
-                //有一个未授权或者多个未授权
-                Toast.makeText(this, "请同意权限以精准定位", Toast.LENGTH_LONG).show();
-                boolean isbool=shouldShowRequestPermissionRationale(permissions[0]);
-
-                Log.e("tag", "isbool:"+isbool);
-            }
-        }
-    }
 }

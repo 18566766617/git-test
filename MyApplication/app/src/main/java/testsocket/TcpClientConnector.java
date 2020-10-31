@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package testsocket;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +31,7 @@ public class TcpClientConnector {
         return mTcpClientConnector;
     }
 
-    Handler mHandler = new Handler() {
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);

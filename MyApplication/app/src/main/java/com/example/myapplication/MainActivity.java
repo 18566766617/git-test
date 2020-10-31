@@ -1,122 +1,188 @@
 package com.example.myapplication;
 
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.ToggleButton;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private EditText edtTxt_Addr;
-    private EditText edtTxt_Port;
-    private ToggleButton tglBtn;
-    private TextView tv_Msg;
-    private EditText edtTxt_Data;
-    private Button btn_Send;
+    String[] permissions = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION};
 
-    private TcpClientConnector connector;
+    private int requestCode = 1;
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void getPermissions() {
+
+        List<String> deniedPermissions = new ArrayList<>();
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
+                deniedPermissions.add(permission);
+            }
+        }
+
+
+        if (deniedPermissions.size() > 0) {
+            //没有授权过，去申请一下
+            requestPermissions(deniedPermissions.toArray(new String[deniedPermissions.size()]), requestCode);
+        } else {
+            Log.e("tag", "权限都已申请2");
+            //关联控件
+            initUI();
+            //给登陆按钮绑定一个事件
+            setOnclick();
+        }
+
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode != -1 && requestCode == requestCode) {
+
+            boolean isVerifyPermission = true;//验证所有权限是否都已经授权
+            for (int grantResult : grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    isVerifyPermission = false;
+                    break;
+                }
+            }
+            if (isVerifyPermission) {
+                //都授权了，执行初始化控件动作
+                Log.e("tag", "权限都已申请1");
+                //关联控件
+                initUI();
+                //给登陆按钮绑定一个事件
+                setOnclick();
+            } else {
+                //有一个未授权或者多个未授权
+
+                for (String permission : permissions) {
+                    Log.e("tag", "permissions:" + permission);
+                    if (shouldShowRequestPermissionRationale(permission)) {
+                        //点击了拒绝
+                        Toast.makeText(this, "请同意权限以精准定位", Toast.LENGTH_LONG).show();
+                        finish();
+                    } else {
+                        //点击了不在询问
+                        Toast.makeText(this, "请到权限页面开启权限", Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                }
+
+            }
+        }
+    }
+
+    public static String LogTag = "OBO-MainActivity";
+
+    private Button bt_login = null;
+    private Button bt_reg = null;
+    private EditText et_username = null;
+    private EditText et_passwd = null;
+    private CheckBox cb_isDriver_login = null;
+    private boolean isDriver = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        WebView webView = findViewById(R.id.webview);
-//        webView.loadUrl("http://www.baidu.com");
-//
-//        webView.setWebViewClient(new WebViewClient() {
-//            @Override
-//            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//                //使用WebView加载显示url
-//                view.loadUrl(url);
-//                //返回true
-//                return true;
-//            }
-//        });
 
-        InitWidgets();
-        connector = TcpClientConnector.getInstance();   //获取connector实例
-        tglBtn.setOnCheckedChangeListener(new TglBtnCheckedChangeEvents());
-        btn_Send.setOnClickListener(new ButtonClickEvent());
-
+        getPermissions();
 
     }
 
-
-    private void InitWidgets() {
-        edtTxt_Addr = (EditText) findViewById(R.id.edtTxt_Addr);
-        edtTxt_Port = (EditText) findViewById(R.id.edtTxt_Port);
-        tglBtn = (ToggleButton) findViewById(R.id.tglBtn);
-        tv_Msg = (TextView) findViewById(R.id.tv_Msg);
-        edtTxt_Data = (EditText) findViewById(R.id.edtTxt_Data);
-        btn_Send = (Button) findViewById(R.id.btn_Send);
+    private void initUI() {
+        bt_login = (Button) findViewById(R.id.bt_login);
+        bt_reg = (Button) findViewById(R.id.bt_reg);
+        et_username = (EditText) findViewById(R.id.et_username);
+        et_passwd = (EditText) findViewById(R.id.et_passwd);
+        cb_isDriver_login = (CheckBox) findViewById(R.id.login_cb_isDriver);
     }
 
-
-    private class TglBtnCheckedChangeEvents implements ToggleButton.OnCheckedChangeListener {
-
-        @Override
-        public void onCheckedChanged(CompoundButton btnView, boolean isChecked) {
-            if (btnView == tglBtn) {
-                if (isChecked == true) {
-                    //连接Tcp服务器端
-                    Log.e("tag", "connect start");
-                    //connector.createConnect("172.16.46.41",8888);   //调试使用
-                    Log.e("tag", "ip:" + edtTxt_Addr.getText().toString() + "||||" + "port:" + Integer.parseInt(edtTxt_Port.getText().toString()));
-                    connector.createConnect(edtTxt_Addr.getText().toString(), Integer.parseInt(edtTxt_Port.getText().toString()));
-                    connector.setOnConnectListener(new TcpClientConnector.ConnectListener() {
-                        @Override
-                        public void onReceiveData(String data) {
-                            //Received Data,do somethings.
-                            tv_Msg.append("Server:" + data + "\n");
-                        }
-                    });
+    private void setOnclick() {
+        cb_isDriver_login.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    isDriver = true;
                 } else {
-                    try {   //断开与服务器的连接
-                        //connector.disconnect();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    isDriver = false;
+                }
+            }
+        });
+
+
+        //绑定登陆按钮的点击事件
+        bt_login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username = et_username.getText().toString();
+                String passwd = et_passwd.getText().toString();
+                Log.e(LogTag, "username:" + username);
+                Log.e(LogTag, "passwd:" + passwd);
+
+                if (username.length() == 0 || passwd.length() == 0) {
+                    Toast.makeText(getApplicationContext(),
+                            "用户名或密码为空", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                boolean login_result = OBOJNI.getInstance().Login(username, passwd, isDriver);
+                Log.e(LogTag, "Login result is " + login_result);
+
+                if (login_result == true) {
+                    if (OBOJNI.getInstance().getIsDriver().equals("no")) {
+                        Intent intent = new Intent();
+                        intent.setClass(MainActivity.this, PassengerActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent();
+                        intent.setClass(MainActivity.this, DriverActivity.class);
+                        startActivity(intent);
                     }
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "登陆失败-无法连接服务器", Toast.LENGTH_SHORT).show();
+                    Log.e(LogTag, "Login error！");
                 }
+
             }
-        }
-    }
+        });
 
 
-    class ButtonClickEvent implements View.OnClickListener {
-        public void onClick(View v) {
-            if (v == btn_Send) {
-                //发送数据
-                try {
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                connector.send(edtTxt_Data.getText().toString());
-                                Log.e("tag,", "send success");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Log.e("tag,", e.getMessage());
-                            }
-                            tv_Msg.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    tv_Msg.append("Client:" + edtTxt_Data.getText().toString() + "\n");
-                                }
-                            });
-                        }
-                    }.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        bt_reg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, RegActivity.class);
+                startActivity(intent);
             }
-        }
+        });
     }
+
 
 }

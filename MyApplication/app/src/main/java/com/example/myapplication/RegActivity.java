@@ -83,7 +83,7 @@ public class RegActivity extends AppCompatActivity {
 
 
                 //将全部信息 发送给远程服务器   会送服务器得到一个结果 放在reg_result
-                reg_result = OBOJNI.getInstance().reg(username,passwd1,
+                reg_result = OBOJNI.getInstance().Reg(username,passwd1,
                         email, phone, idCard, isDriver);
 
 

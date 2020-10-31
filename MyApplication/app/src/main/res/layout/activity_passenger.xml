@@ -8,19 +8,20 @@
 
 
     <TextView
-        android:text="等待服务器定位地址..."
+        android:id="@+id/tv_passenger_srcAddr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tv_passenger_srcAddr"
+        android:text="等待服务器定位地址..."
         android:textSize="18sp" />
 
 
     <AutoCompleteTextView
+        android:id="@+id/attv_passenger_dstAddr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tv_passenger_srcAddr"
-        android:id="@+id/attv_passenger_dstAddr"
-        android:hint="请输入目标地址" />
+        android:hint="请输入目标地址"
+        android:popupBackground="@android:color/holo_green_dark" />
 
     <com.amap.api.maps.MapView
 
@@ -30,19 +31,18 @@
 
         android:layout_height="match_parent"
 
-        android:layout_below="@+id/attv_passenger_dstAddr"
-        >
+        android:layout_below="@+id/attv_passenger_dstAddr">
 
 
     </com.amap.api.maps.MapView>
 
     <Button
-        android:text="开始约车"
+        android:id="@+id/bt_startOrder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/bt_startOrder" />
+        android:layout_alignParentRight="true"
+        android:text="开始约车" />
 
 </RelativeLayout>

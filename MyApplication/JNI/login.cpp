@@ -1,8 +1,8 @@
 #include "OBOjni.h"
 
-#define RESPONSE_DATA_LEN 4096
-//用来接收服务器一个buffer
+
 typedef struct login_response_data {
+
     login_response_data() {
         memset(data, 0, RESPONSE_DATA_LEN);
         data_len = 0;
@@ -11,104 +11,55 @@ typedef struct login_response_data {
     char data[RESPONSE_DATA_LEN];
     int data_len;
 
-} response_data_t;
+} login_response_data_t;
 
-//处理从服务器返回的数据，将数据拷贝到arg中
-size_t deal_response(void *ptr, size_t n, size_t m, void *arg) {
-    int count = m * n;
+size_t curl_login_callback(char *ptr, size_t n, size_t m, void *userdata) {
+    login_response_data_t *data = (login_response_data_t *) userdata;
+    int response_data_len = n * m;
 
-    response_data_t *response_data = (response_data_t *) arg;
+    memcpy(data->data + data->data_len, ptr, response_data_len);
+    data->data_len += response_data_len;
 
-    memcpy(response_data->data, ptr, count);
-
-    response_data->data_len = count;
-
-    return response_data->data_len;
+    return response_data_len;
 }
 
 
-JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_login
-        (JNIEnv *env, jobject obj, jstring j_username, jstring j_passwd, jboolean j_isDriver) {
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_Login
+        (JNIEnv *env, jobject obj, jstring jusername, jstring jpasswd, jboolean jisDriver) {
 
-    const char *username = env->GetStringUTFChars(j_username, NULL);
-    const char *passwd = env->GetStringUTFChars(j_passwd, NULL);
-    const char *isDriver = j_isDriver == JNI_TRUE ? "yes" : "no";
-    __android_log_print(ANDROID_LOG_ERROR, TAG,
-                        "JNI-login: username = %s, passwd = %s, isDriver = %s",
-                        username, passwd, isDriver);
+    const char *username = env->GetStringUTFChars(jusername, NULL);
+    const char *passwd = env->GetStringUTFChars(jpasswd, NULL);
+    const char *isDriver = (jisDriver == JNI_TRUE) ? "yes" : "no";
 
-
-    char *post_str = NULL;
-    CURL *curl = NULL;
-    CURLcode res;
-    response_data_t responseData;
-
-    //初始化curl句柄
-    curl = curl_easy_init();
-    if (curl == NULL) {
-        __android_log_print(ANDROID_LOG_ERROR, TAG, "JNI-login: curl init error \n");
-        return JNI_FALSE;
+    __android_log_print(ANDROID_LOG_ERROR, jniLogTag,
+                        "LOGIN: username = %s, passwd = %s, isDriver = %s\n", username, passwd,
+                        isDriver);
+    //保存当前角色
+    Data::getInstance()->setIsDriver(isDriver);
+    //设置当前的orderid为空
+    Data::getInstance()->setOrderid("NONE");
+    //更新当前角色状态
+    if (jisDriver == JNI_TRUE) {
+        Data::getInstance()->setStatus(OBO_STATUS_DRIVER_IDLE);
+    } else {
+        Data::getInstance()->setStatus(OBO_STATUS_PASSNGER_IDLE);
     }
 
-
-
-
-    //（1）封装一个json字符串
-    //封装一个数据协议
     /*
-
-       ====给服务端的协议====
-     http://ip:port/login [json_data]
+     * 给服务端的协议   https://ip:port/login [json_data]
+     *
     {
-        username: "gailun",
-        password: "123123",
-        driver:   "yes"
+        username: "aaa",
+        password: "bbb",
+        driver: "yes"
     }
-     *
-     *
-     * */
-    cJSON *root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "username", username);
-    cJSON_AddStringToObject(root, "password", passwd);
-    cJSON_AddStringToObject(root, "driver", isDriver);
-    post_str = cJSON_Print(root);
-    cJSON_Delete(root);
-    root = NULL;
-    __android_log_print(ANDROID_LOG_ERROR, TAG, "JNI-login: post_str = [%s]\n", post_str);
 
-    //(2) 想web服务器 发送http请求 其中post数据 json字符串
-    //1 设置curl url
-    curl_easy_setopt(curl, CURLOPT_URL, "https://192.168.0.4:7777/login");
-    //客户端忽略CA证书认证
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, false);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-    //2 开启post请求开关
-    curl_easy_setopt(curl, CURLOPT_POST, true);
-    //3 添加post数据
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_str);
+     * 得到服务器响应数据
 
-    //4 设定一个处理服务器响应的回调函数
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, deal_response);
-
-    //5 给回调函数传递一个形参
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
-
-    //6 向服务器发送请求,等待服务器的响应
-    res = curl_easy_perform(curl);
-    if (res != CURLE_OK) {
-        __android_log_print(ANDROID_LOG_ERROR, TAG, "JNI-login:perform ERROR, rescode= [%d]\n",
-                            res);
-        return JNI_FALSE;
-
-    }
-    //（3）处理服务器响应的数据 此刻的responseData就是从服务器获取的数据
-
-
-    /*
-
-      //成功
+    //成功
     {
         result: "ok",
+        sessionid: "xxxxxxxx"
     }
     //失败
     {
@@ -116,146 +67,115 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_login
         reason: "why...."
     }
 
-     *
+     */
+    //封装登陆json字符串
+    cJSON *root = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(root, "username", username);
+    cJSON_AddStringToObject(root, "password", passwd);
+    cJSON_AddStringToObject(root, "driver", isDriver);
+
+    char *json_str = cJSON_Print(root);
+    cJSON_Delete(root);
+    __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "JNI-login: json_str = [%s]\n", json_str);
+
+    //发送url请求，
+    CURLcode curl_ret;
+    CURL *curl = curl_easy_init();
+
+    login_response_data_t res_data;
+//    const char *uri = "https://192.168.0.5:7777/login";
+    char uri[50] = {0};
+    sprintf(uri, "%s:%s/login", OBO_SERVER_IP, OBO_SERVER_PORT);
+    __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "JNI-login: uri = [%s]\n", uri);
+
+    curl_easy_setopt(curl, CURLOPT_URL, uri);
+    curl_easy_setopt(curl, CURLOPT_POST, true);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_str);
+
+    /*
+     * 如果用HTTPS协议，额外需要添加的部分,客户端忽略CA证书认证
      * */
-    //(4) 解析服务器返回的json字符串
-    root = cJSON_Parse(responseData.data);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, false);
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_login_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res_data);
+
+    curl_ret = curl_easy_perform(curl);
+    if (curl_ret != CURLE_OK) {
+        __android_log_print(ANDROID_LOG_ERROR, jniLogTag,
+                            "JNI-login:perform ERROR, rescode= [%d]\n",
+                            curl_ret);
+        return JNI_FALSE;
+    }
+    curl_easy_cleanup(curl);
+
+    free(json_str);
+
+    //得到服务器响应数据
+    /*
+     *
+       //成功
+       {
+            result: "ok",
+            recode: "0",
+            sessionid: "xxxxxxxx"
+        }
+        //失败
+        {
+            result: "error",
+            reason: "why...."
+        }
+
+     */
+    res_data.data[res_data.data_len] = '\0';
+    bool login_succ = false;
+
+    root = cJSON_Parse(res_data.data);
 
     cJSON *result = cJSON_GetObjectItem(root, "result");
-    if (result && strcmp(result->valuestring, "ok") == 0) {
-        //登陆成功
-        __android_log_print(ANDROID_LOG_ERROR, TAG, "JNI-login:login succ！！！");
-        return JNI_TRUE;
+
+    if (result && (strcmp(result->valuestring, "ok") == 0)) {
+        //success
+
+        // Data::getInstance()->setSessionid(cJSON_GetObjectItem(root, "sessionid")->valuestring);
+        __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "login succ, sessionid=%s\n",
+                            Data::getInstance()->getSessionid().c_str());
+        login_succ = true;
+
 
     } else {
-        //登陆失败
+        //fail
         cJSON *reason = cJSON_GetObjectItem(root, "reason");
         if (reason) {
-            //已知错误
-            __android_log_print(ANDROID_LOG_ERROR, TAG, "JNI-login:login error, reason = %s！！！",
+            __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "Login error, reason = %s\n",
                                 reason->valuestring);
-
         } else {
-            //未知的错误
-            __android_log_print(ANDROID_LOG_ERROR, TAG,
-                                "JNI-login:login error, reason = Unknow！！！");
-
+            JNIINFO("Login error, unknow reason, res_data=%s\n", res_data.data);
+            __android_log_print(ANDROID_LOG_ERROR, jniLogTag,
+                                "Login error, unknow reason, res_data=%s\n",
+                                res_data.data);
         }
 
+        login_succ = false;
+    }
+
+    cJSON_Delete(root);
+
+
+    //释放字符串资源
+    env->ReleaseStringUTFChars(jusername, username);
+    env->ReleaseStringUTFChars(jpasswd, passwd);
+
+    if (login_succ == true) {
+        return JNI_TRUE;
+    } else {
         return JNI_FALSE;
     }
 
+
 }
 
 
-JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_mylogin
-        (JNIEnv *env, jobject obj, jstring j_username, jstring j_passwd, jboolean j_isDriver) {
-    const char *username = env->GetStringUTFChars(j_username, NULL);
-    const char *passwd = env->GetStringUTFChars(j_passwd, NULL);
-    const char *isDriver = j_isDriver == JNI_TRUE ? "yes" : "no";
-
-    char *post_str = NULL;
-
-    __android_log_print(ANDROID_LOG_ERROR, TAG,
-                        "JNI-login: username = %s, passwd = %s, isDriver = %s",
-                        username, passwd, isDriver);
-
-
-    //封装一个数据协议
-    /*
-
-       ====给服务端的协议====
-     http://ip:port/login [json_data]
-    {
-        username: "gailun",
-        password: "123123",
-        driver:   "yes"
-    }
-     *
-     *
-     * */
-
-    //（1）封装一个json字符串
-    cJSON *root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "username", username);
-    cJSON_AddStringToObject(root, "password", passwd);
-    cJSON_AddStringToObject(root, "driver", isDriver);
-    post_str = cJSON_Print(root);
-    __android_log_print(ANDROID_LOG_ERROR, TAG, "JNI-login: post_str = [%s]\n", post_str);
-    //(2) 想web服务器 发送http请求 其中post数据 json字符串
-    // 创建套接字
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    __android_log_print(ANDROID_LOG_ERROR, TAG, "JNI-login: fd= [%d]\n", fd);
-
-    // 连接服务器
-    struct sockaddr_in serv;
-    memset(&serv, 0, sizeof(serv));
-    serv.sin_family = AF_INET;
-    serv.sin_port = htons(8888);
-    //serv.sin_addr.s_addr = inet_addr("192.168.0.4");
-    // oserv.sin_addr.s_addr = htonl();
-    inet_pton(AF_INET, "192.168.0.4", &serv.sin_addr.s_addr);
-
-
-    connect(fd, (struct sockaddr *) &serv, sizeof(serv));
-
-    // 通信
-    while (1) {
-        // 发送数据
-        char buf[1024] = {0};
-        //memset(buf, 0, sizeof(buf));
-        //sprintf(buf, "%s", post_str);
-        strcpy(buf, post_str);
-        write(fd, buf, strlen(buf));
-
-        // 等待接收数据
-
-        int len = read(fd, buf, sizeof(buf));
-        if (len == -1) {
-
-
-            __android_log_print(ANDROID_LOG_ERROR, TAG,
-                                "read error");
-
-            exit(1);
-        } else if (len == 0) {
-
-            __android_log_print(ANDROID_LOG_ERROR, TAG,
-                                "服务器端关闭了连接\n");
-
-            break;
-        } else {
-
-            __android_log_print(ANDROID_LOG_ERROR, TAG,
-                                "recv buf: %s\n",
-                                buf);
-
-        }
-    }
-
-
-    //（3） 等待服务器的响应
-
-
-    /*
-
-      //成功
-    {
-        result: "ok",
-    }
-    //失败
-    {
-        result: "error",
-        reason: "why...."
-    }
-
-     *
-     * */
-    //(4) 解析服务器返回的json字符串
-
-    // 如果“result”字段 == ok,登陆成功， error  登陆失败
-
-    close(fd);
-    return JNI_TRUE;
-}
 

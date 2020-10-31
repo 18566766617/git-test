@@ -31,7 +31,19 @@
 
 #include "Json.h"
 #include "Curl.h"
+#include "Data.h"
 
-#define TAG "tag"
+
+
+
+#define jniLogTag           "tag"
+#define OBO_SERVER_IP       "https://192.168.0.5"
+#define OBO_SERVER_PORT     "7777"
+
+#define RESPONSE_DATA_LEN   (4096)
+#define TIME_STR_LEN        (64)
+
+#define JNIINFO(fmt, ...)   __android_log_print(ANDROID_LOG_INFO, jniLogTag, fmt, __VA_ARGS__);
+
 
 #endif

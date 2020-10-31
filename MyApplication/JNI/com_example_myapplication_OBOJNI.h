@@ -9,6 +9,134 @@ extern "C" {
 #endif
 /*
  * Class:     com_example_myapplication_OBOJNI
+ * Method:    Login
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Z)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_Login
+  (JNIEnv *, jobject, jstring, jstring, jboolean);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    Reg
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_Reg
+  (JNIEnv *, jobject, jstring, jstring, jstring, jstring, jstring, jboolean);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    StartOrder
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_StartOrder
+  (JNIEnv *, jobject, jstring, jstring, jstring, jstring, jstring, jstring, jstring);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    DriverLocationChanged
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_DriverLocationChanged
+  (JNIEnv *, jobject, jstring, jstring, jstring, jstring);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    PassengerLocationChanged
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_PassengerLocationChanged
+  (JNIEnv *, jobject, jstring, jstring, jstring, jstring, jstring, jstring);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    FinishOrder
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_FinishOrder
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    setStatus
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_example_myapplication_OBOJNI_setStatus
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    getOrderid
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_getOrderid
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    getSessionid
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_getSessionid
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    getStatus
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_getStatus
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    getIsDriver
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_getIsDriver
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    getPtempLongitude
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_getPtempLongitude
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    getPtempLatitude
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_getPtempLatitude
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    getDtempLongitude
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_getDtempLongitude
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    getDtempLatitude
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_getDtempLatitude
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
+ * Method:    testLibcurl
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_example_myapplication_OBOJNI_testLibcurl
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_example_myapplication_OBOJNI
  * Method:    hello_jni
  * Signature: ()V
  */
@@ -54,22 +182,6 @@ JNIEXPORT jstring JNICALL Java_com_example_myapplication_OBOJNI_test_1jni_1api3
  */
 JNIEXPORT void JNICALL Java_com_example_myapplication_OBOJNI_test_1jni_1api4_1array
   (JNIEnv *, jobject, jintArray);
-
-/*
- * Class:     com_example_myapplication_OBOJNI
- * Method:    login
- * Signature: (Ljava/lang/String;Ljava/lang/String;Z)Z
- */
-JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_login
-  (JNIEnv *, jobject, jstring, jstring, jboolean);
-
-/*
- * Class:     com_example_myapplication_OBOJNI
- * Method:    reg
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Z
- */
-JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_reg
-  (JNIEnv *, jobject, jstring, jstring, jstring, jstring, jstring, jboolean);
 
 /*
  * Class:     com_example_myapplication_OBOJNI
