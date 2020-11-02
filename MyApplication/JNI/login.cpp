@@ -85,11 +85,11 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_Login
 
     login_response_data_t res_data;
 //    const char *uri = "https://192.168.0.5:7777/login";
-    char uri[50] = {0};
-    sprintf(uri, "%s:%s/login", OBO_SERVER_IP, OBO_SERVER_PORT);
-    __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "JNI-login: uri = [%s]\n", uri);
+    char url[50] = {0};
+    sprintf(url, "%s:%s/login", OBO_SERVER_IP, OBO_SERVER_PORT);
+    __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "JNI-login: uri = [%s]\n", url);
 
-    curl_easy_setopt(curl, CURLOPT_URL, uri);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_POST, true);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_str);
 
@@ -139,7 +139,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_Login
     if (result && (strcmp(result->valuestring, "ok") == 0)) {
         //success
 
-        // Data::getInstance()->setSessionid(cJSON_GetObjectItem(root, "sessionid")->valuestring);
+        Data::getInstance()->setSessionid(cJSON_GetObjectItem(root, "sessionid")->valuestring);
         __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "login succ, sessionid=%s\n",
                             Data::getInstance()->getSessionid().c_str());
         login_succ = true;

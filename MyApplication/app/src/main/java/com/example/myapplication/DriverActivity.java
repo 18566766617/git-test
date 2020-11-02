@@ -22,6 +22,8 @@ import com.amap.api.maps.model.MarkerOptions;
 
 
 public class DriverActivity extends AppCompatActivity {
+    public static String LogTag = "tagDriverActivity";
+
     //创建一个地图容器MapView对象
     private MapView _mapView = null;
     //地图的UISetting对象 给amap设置地图内嵌控件
@@ -112,10 +114,10 @@ public class DriverActivity extends AppCompatActivity {
 
                     if (aMapLocation.getErrorCode() == 0) {
                         //定位成功，aMapLocation获取数据
-                        Log.e("tag", "location succ address = " + aMapLocation.getAddress());
-                        Log.e("tag", "city = " + aMapLocation.getCity());
-                        Log.e("tag", "longtitude = " + aMapLocation.getLongitude());
-                        Log.e("tag", "latitude = " + aMapLocation.getLatitude());
+                        Log.e(LogTag, "location succ address = " + aMapLocation.getAddress());
+                        Log.e(LogTag, "city = " + aMapLocation.getCity());
+                        Log.e(LogTag, "longtitude = " + aMapLocation.getLongitude());
+                        Log.e(LogTag, "latitude = " + aMapLocation.getLatitude());
 
                         if (isAddSelfMarker == false) {
                             //在此位置添加一个标记
@@ -130,7 +132,7 @@ public class DriverActivity extends AppCompatActivity {
                     } else {
                         //定位失败，
 
-                        Log.e("tag", "location error, code = " + aMapLocation.getErrorCode() +
+                        Log.e(LogTag, "location error, code = " + aMapLocation.getErrorCode() +
                                 ", info = " + aMapLocation.getErrorInfo());
                     }
                 }
@@ -160,7 +162,7 @@ public class DriverActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("tag", "onResume()...");
+        Log.e(LogTag, "onResume()...");
         _mapView.onResume();
     }
 
@@ -168,21 +170,21 @@ public class DriverActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("tag", "onPause()...");
+        Log.e(LogTag, "onPause()...");
         _mapView.onPause();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.e("tag", "onSaveInstanceState()...");
+        Log.e(LogTag, "onSaveInstanceState()...");
         _mapView.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.e("tag", "onDestroy()...");
+        Log.e(LogTag, "onDestroy()...");
         _mapView.onDestroy();
     }
 

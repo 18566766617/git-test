@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             //没有授权过，去申请一下
             requestPermissions(deniedPermissions.toArray(new String[deniedPermissions.size()]), requestCode);
         } else {
-            Log.e("tag", "权限都已申请2");
+            Log.e(LogTag, "权限都已申请2");
             //关联控件
             initUI();
             //给登陆按钮绑定一个事件
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             }
             if (isVerifyPermission) {
                 //都授权了，执行初始化控件动作
-                Log.e("tag", "权限都已申请1");
+                Log.e(LogTag, "权限都已申请1");
                 //关联控件
                 initUI();
                 //给登陆按钮绑定一个事件
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 //有一个未授权或者多个未授权
 
                 for (String permission : permissions) {
-                    Log.e("tag", "permissions:" + permission);
+                    Log.e(LogTag, "permissions:" + permission);
                     if (shouldShowRequestPermissionRationale(permission)) {
                         //点击了拒绝
                         Toast.makeText(this, "请同意权限以精准定位", Toast.LENGTH_LONG).show();
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static String LogTag = "OBO-MainActivity";
+    public static String LogTag = "tagMainActivity";
 
     private Button bt_login = null;
     private Button bt_reg = null;

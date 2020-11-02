@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class RegActivity extends AppCompatActivity {
 
-    public static String LogTag = "tag";
+    public static String LogTag = "tagRegActivity";
 
     private EditText et_reg_username = null;
     private EditText et_reg_passwd1 = null;

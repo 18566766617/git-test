@@ -46,6 +46,8 @@ import overlay.DrivingRouteOverlay;
 
 public class PassengerActivity extends AppCompatActivity {
 
+    public static String LogTag = "tagPassengerActivity";
+
     private MapView _mapView = null;
     private AMap _amap = null;
     private AMapLocationClient _amapLocationClient = null;
@@ -122,10 +124,10 @@ public class PassengerActivity extends AppCompatActivity {
 
                     if (aMapLocation.getErrorCode() == 0) {
                         //定位成功，aMapLocation获取数据
-                        Log.e("tag", "location succ address = " + aMapLocation.getAddress());
-                        Log.e("tag", "city = " + aMapLocation.getCity());
-                        Log.e("tag", "longtitude = " + aMapLocation.getLongitude());
-                        Log.e("tag", "latitude = " + aMapLocation.getLatitude());
+                        Log.e(LogTag, "location succ address = " + aMapLocation.getAddress());
+                        Log.e(LogTag, "city = " + aMapLocation.getCity());
+                        Log.e(LogTag, "longtitude = " + aMapLocation.getLongitude());
+                        Log.e(LogTag, "latitude = " + aMapLocation.getLatitude());
 
                         if (isAddSelfMarker == false) {
                             //在此位置添加一个标记
@@ -151,7 +153,7 @@ public class PassengerActivity extends AppCompatActivity {
                     } else {
                         //定位失败，
 
-                        Log.e("tag", "location error, code = " + aMapLocation.getErrorCode() +
+                        Log.e(LogTag, "location error, code = " + aMapLocation.getErrorCode() +
                                 ", info = " + aMapLocation.getErrorInfo());
                     }
                 }
@@ -185,7 +187,7 @@ public class PassengerActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //开始搜索POI兴趣点
 
-                Log.e("tag", "button onclick");
+                Log.e(LogTag, "button onclick");
 
                 //拿到用户搜索地址的关键字
                 String dstAddr = _attv_dstAddr.getText().toString();
@@ -204,7 +206,7 @@ public class PassengerActivity extends AppCompatActivity {
                         //处理得到的POI兴趣点集合 poiResult
 
                         if (i != 1000) {
-                            Log.e("tag", "poi Search error code = " + i);
+                            Log.e(LogTag, "poi Search error code = " + i);
                             return;
                         }
 
@@ -215,10 +217,10 @@ public class PassengerActivity extends AppCompatActivity {
                         for (int index = 0; index < poiList.size(); index++) {
                             //此时 表示处理每个已经搜索到的兴趣点
 
-                            Log.e("tag", "搜索到的兴趣点有");
+                            Log.e(LogTag, "搜索到的兴趣点有");
                             PoiItem item = poiList.get(index);
 
-                            Log.e("tag", "poi title =" + item.getTitle() +
+                            Log.e(LogTag, "poi title =" + item.getTitle() +
                                     "latitude = " + item.getLatLonPoint().getLatitude() +
                                     "longitude = " + item.getLatLonPoint().getLongitude());
 
@@ -280,7 +282,7 @@ public class PassengerActivity extends AppCompatActivity {
 
                 //判断是否请求成功
                 if (i != 1000) {
-                    Log.e("tag", "搜索驾驶路径失败");
+                    Log.e(LogTag, "搜索驾驶路径失败");
                     return;
                 }
 
@@ -357,7 +359,7 @@ public class PassengerActivity extends AppCompatActivity {
                 //(1) 得到要搜索的关键字
                 final String keyword = _attv_dstAddr.getText().toString();
                 if (keyword == null || keyword.length() == 0) {
-                    Log.e("tag", "search keyword == null");
+                    Log.e(LogTag, "search keyword == null");
                     return;
                 }
 
@@ -372,7 +374,7 @@ public class PassengerActivity extends AppCompatActivity {
                     @Override
                     public void onGetInputtips(List<Tip> list, int i) {
                         if (i != 1000) {
-                            Log.e("tag", "search input tips error i = " + i);
+                            Log.e(LogTag, "search input tips error i = " + i);
                             return;
                         }
 
@@ -390,7 +392,7 @@ public class PassengerActivity extends AppCompatActivity {
                         */
 
                         for (int index = 0; index < list.size(); index++) {
-                            Log.e("tag", "通过 " + keyword + "匹配到的tips 有 " + list.get(index).getName());
+                            Log.e(LogTag, "通过 " + keyword + "匹配到的tips 有 " + list.get(index).getName());
                             poiList.add(list.get(index).getName());
 
                         }
