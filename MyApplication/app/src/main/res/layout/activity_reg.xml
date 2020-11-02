@@ -7,97 +7,97 @@
     tools:context=".RegActivity">
 
     <EditText
+        android:id="@+id/et_reg_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="52dp"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="25dp"
-        android:id="@+id/et_username_reg"
-        android:hint="请输入用户名" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:ems="10"
-        android:layout_below="@+id/et_username_reg"
-        android:layout_alignRight="@+id/et_username_reg"
-        android:layout_alignEnd="@+id/et_username_reg"
-        android:layout_marginTop="15dp"
-        android:id="@+id/et_passwd1_reg"
-        android:hint="请输入密码" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:ems="10"
-        android:layout_below="@+id/et_passwd1_reg"
-        android:layout_alignLeft="@+id/et_passwd1_reg"
-        android:layout_alignStart="@+id/et_passwd1_reg"
-        android:layout_marginTop="18dp"
-        android:id="@+id/et_passwd2_reg"
-        android:hint="请再次输入密码" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textEmailAddress"
-        android:ems="10"
-        android:layout_below="@+id/et_passwd2_reg"
-        android:layout_alignRight="@+id/et_passwd2_reg"
-        android:layout_alignEnd="@+id/et_passwd2_reg"
-        android:layout_marginTop="17dp"
-        android:id="@+id/et_email_reg"
-        android:hint="请输入emal" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="phone"
-        android:ems="10"
-        android:layout_below="@+id/et_email_reg"
-        android:layout_alignLeft="@+id/et_email_reg"
-        android:layout_alignStart="@+id/et_email_reg"
-        android:layout_marginTop="18dp"
-        android:id="@+id/et_phone_reg"
-        android:hint="请输入电话号码" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:layout_below="@+id/et_phone_reg"
-        android:layout_alignLeft="@+id/et_phone_reg"
-        android:layout_alignStart="@+id/et_phone_reg"
-        android:layout_marginTop="17dp"
-        android:id="@+id/et_idcard_reg"
-        android:hint="请输入idcard" />
-
-    <CheckBox
-        android:text="司机"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/et_idcard_reg"
-        android:layout_alignLeft="@+id/et_idcard_reg"
-        android:layout_alignStart="@+id/et_idcard_reg"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="40dp"
+        android:layout_marginLeft="40dp"
         android:layout_marginTop="35dp"
-        android:id="@+id/cb_isDrvier_reg" />
+        android:ems="10"
+        android:hint="请输入用户名"
+        android:inputType="textPersonName" />
 
     <Button
-        android:text="提交"
+        android:id="@+id/bt_reg_submit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/cb_isDrvier_reg"
-        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/cb_is_driver"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="53dp"
-        android:layout_marginEnd="53dp"
-        android:id="@+id/bt_submit_reg" />
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="50dp"
+        android:layout_marginRight="50dp"
+        android:text="提交" />
+
+    <CheckBox
+        android:id="@+id/cb_is_driver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_reg_id_card"
+        android:layout_alignStart="@+id/et_reg_id_card"
+        android:layout_alignLeft="@+id/et_reg_id_card"
+        android:layout_marginTop="26dp"
+        android:text="司机" />
+
+    <EditText
+        android:id="@+id/et_reg_passwd1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_reg_username"
+        android:layout_alignStart="@+id/et_reg_username"
+        android:layout_alignLeft="@+id/et_reg_username"
+        android:layout_marginTop="14dp"
+        android:ems="10"
+        android:hint="请输入密码"
+        android:inputType="textPassword" />
+
+    <EditText
+        android:id="@+id/et_reg_passwd2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_reg_passwd1"
+        android:layout_alignStart="@+id/et_reg_passwd1"
+        android:layout_alignLeft="@+id/et_reg_passwd1"
+        android:layout_marginTop="15dp"
+        android:ems="10"
+        android:hint="再次输入密码"
+        android:inputType="textPassword" />
+
+    <EditText
+        android:id="@+id/et_reg_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_reg_passwd2"
+        android:layout_alignStart="@+id/et_reg_passwd2"
+        android:layout_alignLeft="@+id/et_reg_passwd2"
+        android:layout_marginTop="11dp"
+        android:ems="10"
+        android:hint="请输入Email"
+        android:inputType="textEmailAddress" />
+
+    <EditText
+        android:id="@+id/et_reg_tel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_reg_email"
+        android:layout_alignStart="@+id/et_reg_email"
+        android:layout_alignLeft="@+id/et_reg_email"
+        android:layout_marginTop="15dp"
+        android:ems="10"
+        android:hint="请输入电话号码"
+        android:inputType="phone" />
+
+    <EditText
+        android:id="@+id/et_reg_id_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et_reg_tel"
+        android:layout_alignStart="@+id/et_reg_tel"
+        android:layout_alignLeft="@+id/et_reg_tel"
+        android:layout_marginTop="18dp"
+        android:ems="10"
+        android:hint="请输入身份证号码"
+        android:inputType="number" />
 </RelativeLayout>
