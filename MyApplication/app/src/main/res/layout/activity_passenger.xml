@@ -1,48 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_passenger"
+    android:id="@+id/activity_passenger_map"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".PassengerActivity">
 
 
-    <TextView
-        android:id="@+id/tv_passenger_srcAddr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="等待服务器定位地址..."
-        android:textSize="18sp" />
-
-
-    <AutoCompleteTextView
-        android:id="@+id/attv_passenger_dstAddr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_passenger_srcAddr"
-        android:hint="请输入目标地址"
-        android:popupBackground="@android:color/holo_green_dark" />
-
-    <com.amap.api.maps.MapView
-
-        android:id="@+id/PassengerMap"
-
+    <RelativeLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        android:layout_height="match_parent"
+        <AutoCompleteTextView
+            android:id="@+id/autotv_passgener_finalAddr"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:background="@android:color/white"
+            android:hint="请输入终止地址"
+            android:popupBackground="@android:color/darker_gray"
+            android:textColor="@android:color/darker_gray" />
 
-        android:layout_below="@+id/attv_passenger_dstAddr">
+        <TextView
+            android:id="@+id/tv_passgener_info"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:text="" />
+    </RelativeLayout>
 
-
-    </com.amap.api.maps.MapView>
 
     <Button
         android:id="@+id/bt_startOrder"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:layout_below="@+id/autotv_passgener_finalAddr"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:text="开始约车" />
 
-</RelativeLayout>
+    <com.amap.api.maps.MapView
+        android:id="@+id/passenger_map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bt_startOrder"
+        android:layout_marginTop="5dp">
+
+    </com.amap.api.maps.MapView>
+
+
+</LinearLayout>

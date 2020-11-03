@@ -1,7 +1,6 @@
 package com.example.myapplication;
 
 
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,7 +20,9 @@ import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
@@ -50,380 +51,484 @@ public class PassengerActivity extends AppCompatActivity {
 
     private MapView _mapView = null;
     private AMap _amap = null;
+    private UiSettings _uiSettings = null;
     private AMapLocationClient _amapLocationClient = null;
-    private AMapLocationClientOption _amapLocationOption = null;
-    private Button _bt_startOrder = null;
-    private TextView _tv_srcAddr = null;
-    private AutoCompleteTextView _attv_dstAddr = null;
+    private AMapLocationClientOption _amapLocationClientOption = null;
+    private Marker locationMarker = null;
+    private boolean postMyLocationCenter = true;
 
-    private Marker _selfMarker = null;
-    private boolean isAddSelfMarker = false;
-    private String _city;//当前定位所在的城市
 
+    //ui
+    private AutoCompleteTextView autotv_finalAddr = null;
+    private Button bt_startOrder = null;
+    private TextView tv_passenger_info = null;
+
+    //地理数据
+    private String _city = null;
+    //起始出发坐标点
     private LatLonPoint _startPoint = null;
+    //终止目的地坐标点
     private LatLonPoint _endPoint = null;
+    //起始地点
+    private String _startAddr = null;
+    //终止地点
+    private String _finalAddr = null;
+
+    //是否有司机接单
+    private boolean _driverGet = false;
+    private String bt_status = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passenger);
 
-        initUI();
-        createMap(savedInstanceState);
-        doLocation();
-        doSerarchPOI();
-        initAutoCompeleteTextView();
-
-    }
-
-    protected void initUI() {
-        _mapView = (MapView) findViewById(R.id.PassengerMap);
-        _bt_startOrder = (Button) findViewById(R.id.bt_startOrder);
-        _tv_srcAddr = (TextView) findViewById(R.id.tv_passenger_srcAddr);
-        _attv_dstAddr = (AutoCompleteTextView) findViewById(R.id.attv_passenger_dstAddr);
-
-    }
-
-
-    protected void createMap(Bundle savedInstanceState) {
-        //展示地图容器
+        //初始化mapView 容器
+        _mapView = (MapView) findViewById(R.id.passenger_map);
+        //启动mapView显示主地图
         _mapView.onCreate(savedInstanceState);
 
 
-        //得到amap对象
-        _amap = _mapView.getMap();
+        //获取mMap操作对象
+        if (_amap == null) {
+            _amap = _mapView.getMap();
 
-        //默认显示实时交通信息
-        _amap.setTrafficEnabled(true);
-
-    }
-
-    //启动定位服务器
-    protected void doLocation() {
-        //1 创建一个客户端定位句柄
-        _amapLocationClient = new AMapLocationClient(getApplicationContext());
-
-        //1.5 给定位客户端设置一些属性
-        _amapLocationOption = new AMapLocationClientOption();
-        //每个5s定位一次
-        _amapLocationOption.setInterval(3000);
-        //_amapLocationOption.setOnceLocation(true);
-
-        //将option设置给client对象
-        _amapLocationClient.setLocationOption(_amapLocationOption);
-
-        //2 给客户端句柄设置一个listenner来处理服务器返回的定位数据
-        _amapLocationClient.setLocationListener(new AMapLocationListener() {
-            @Override
-            public void onLocationChanged(AMapLocation aMapLocation) {
-                //onLocationChanged 就是如果服务器给客户端返回数据，调用的回调函数
-                //aMapLocation 就是服务器给客户端返回的定位数据
-
-                if (aMapLocation != null) {
-                    //服务器是有响应的
-
-                    if (aMapLocation.getErrorCode() == 0) {
-                        //定位成功，aMapLocation获取数据
-                        Log.e(LogTag, "location succ address = " + aMapLocation.getAddress());
-                        Log.e(LogTag, "city = " + aMapLocation.getCity());
-                        Log.e(LogTag, "longtitude = " + aMapLocation.getLongitude());
-                        Log.e(LogTag, "latitude = " + aMapLocation.getLatitude());
-
-                        if (isAddSelfMarker == false) {
-                            //在此位置添加一个标记
-                            addMarkerToMap(aMapLocation.getLatitude(), aMapLocation.getLongitude());
-                            isAddSelfMarker = true;
-
-                            //以自我为中心展示地图
-                            moveMap(aMapLocation.getLatitude(), aMapLocation.getLongitude());
-                        }
-
-                        if (_startPoint == null) {
-                            //得到乘客的起始坐标点
-                            _startPoint = new LatLonPoint(aMapLocation.getLatitude(), aMapLocation.getLongitude());
-                        }
-
-
-                        //设置乘客源地址信息
-                        _tv_srcAddr.setText(aMapLocation.getAddress());
-
-                        _city = aMapLocation.getCity();
-
-
-                    } else {
-                        //定位失败，
-
-                        Log.e(LogTag, "location error, code = " + aMapLocation.getErrorCode() +
-                                ", info = " + aMapLocation.getErrorInfo());
-                    }
-                }
+            if (_uiSettings == null) {
+                _uiSettings = _amap.getUiSettings();
             }
-        });
+        }
 
-        //3 开启定位服务
-        _amapLocationClient.startLocation();
+        //初始化搜索布局
+        initSearchBarLayout();
+
+        /* -------------- 开始定位业务 -------------- */
+        doLocation();
+
     }
 
-    //向固定的经纬度添加一个标记
-    protected void addMarkerToMap(double latitude, double longitude) {
-        _selfMarker = _amap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
-                .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.location_marker))));
-    }
+    //初始化搜索菜单栏
+    public void initSearchBarLayout() {
 
+        autotv_finalAddr = (AutoCompleteTextView) findViewById(R.id.autotv_passgener_finalAddr);
+        bt_startOrder = (Button) findViewById(R.id.bt_startOrder);
+        tv_passenger_info = (TextView) findViewById(R.id.tv_passgener_info);
 
-    //以某个经纬度为中心来展示地图
-    protected void moveMap(double latitude, double longtiude) {
-        LatLng lagLng = new LatLng(latitude, longtiude);
+        bt_status = getString(R.string.PASSENGER_BUTTON_STATUS_IDLE);
 
-        //移动amap地图 以之前的缩放比例展示
-        _amap.animateCamera(CameraUpdateFactory.newLatLngZoom(lagLng, _amap.getCameraPosition().zoom));
-    }
-
-
-    //开启POI兴趣点搜索
-    protected void doSerarchPOI() {
-        _bt_startOrder.setOnClickListener(new View.OnClickListener() {
+        bt_startOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //开始搜索POI兴趣点
+                if (OBOJNI.getInstance().getStatus().toString().equals(getString(R.string.PASSENGER_STATUS_IDLE))) {
 
-                Log.e(LogTag, "button onclick");
+                    _finalAddr = autotv_finalAddr.getText().toString().trim();
 
-                //拿到用户搜索地址的关键字
-                String dstAddr = _attv_dstAddr.getText().toString();
-
-                //开始POI搜索
-                // 1 创建一个搜索的条件对象 query
-                PoiSearch.Query query = new PoiSearch.Query(dstAddr, "", _city);
-
-                // 2 创建一个POISearch句柄和query关联
-                PoiSearch poiSearch = new PoiSearch(getApplicationContext(), query);
-
-                // 3 给search绑定一个回调函数
-                poiSearch.setOnPoiSearchListener(new PoiSearch.OnPoiSearchListener() {
-                    @Override
-                    public void onPoiSearched(PoiResult poiResult, int i) {
-                        //处理得到的POI兴趣点集合 poiResult
-
-                        if (i != 1000) {
-                            Log.e(LogTag, "poi Search error code = " + i);
-                            return;
-                        }
-
-
-                        //搜索成功
-                        List<PoiItem> poiList = poiResult.getPois();
-
-                        for (int index = 0; index < poiList.size(); index++) {
-                            //此时 表示处理每个已经搜索到的兴趣点
-
-                            Log.e(LogTag, "搜索到的兴趣点有");
-                            PoiItem item = poiList.get(index);
-
-                            Log.e(LogTag, "poi title =" + item.getTitle() +
-                                    "latitude = " + item.getLatLonPoint().getLatitude() +
-                                    "longitude = " + item.getLatLonPoint().getLongitude());
-
-                            //给每个搜索到的标记点画一个标记
-                            addMarkerToMap(item.getLatLonPoint().getLatitude(),
-                                    item.getLatLonPoint().getLongitude());
-
-
-                            //默认以第一个兴趣点为我们坐标点
-                            _endPoint = new LatLonPoint(item.getLatLonPoint().getLatitude(),
-                                    item.getLatLonPoint().getLongitude());
-
-
-                            drawRouteLine();
-
-                            if (index == 0) {
-                                break;
-                            }
-
-                        }
-
-
+                    if (_finalAddr == null) {
+                        return;
                     }
 
-                    @Override
-                    public void onPoiItemSearched(PoiItem poiItem, int i) {
+                    doSearchPoi(_finalAddr);
 
-                    }
-                });
+                }
 
-                // 4 启动搜索
-                poiSearch.searchPOIAsyn();
             }
         });
+
+        /*--------  设置关键字模糊搜索 --------*/
+        setAutoCompleteAddress();
     }
 
 
-    //绘制驾驶交通路径
-    protected void drawRouteLine() {
-        //1 创建路径的绘制的句柄 routeSearch
-        RouteSearch routeSearch = new RouteSearch(getApplicationContext());
+    public void doSearchPoi(String targetAddr) {
+        /* ---------------  获取POI数据 (begin)-----------------*/
+        //1 定义查询条件
 
-        RouteSearch.FromAndTo ft = new RouteSearch.FromAndTo(_startPoint, _endPoint);
+        // 参数1 查询关键字
+        // 参数2 隶属范围， 如果填"" 表示不关心
+        // 参数3 查询关键字地点所属城市
+        PoiSearch.Query poiSearchQuery = new PoiSearch.Query(targetAddr, "", _city);
 
-        // 2 设置一个路径搜索的query
-        RouteSearch.DriveRouteQuery query = new RouteSearch.DriveRouteQuery(ft, RouteSearch.DrivingDefault,
-                null, null, "");
+        //2 根据查询条件 创建 查询句柄
+        PoiSearch poiSearch = new PoiSearch(getApplicationContext(), poiSearchQuery);
 
-        // 3 给绘制路径的句柄设置一个callback函数
-        routeSearch.setRouteSearchListener(new RouteSearch.OnRouteSearchListener() {
+        //3 设置搜索回调
+        poiSearch.setOnPoiSearchListener(new PoiSearch.OnPoiSearchListener() {
             @Override
-            public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
-                //公交处理业务
-            }
-
-            @Override
-            public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int i) {
-                //驾驶的理业务
-
-                //判断是否请求成功
+            public void onPoiSearched(PoiResult poiResult, int i) {
+                //针对搜索 PoiItem集合的回调
                 if (i != 1000) {
-                    Log.e(LogTag, "搜索驾驶路径失败");
+                    Log.e(LogTag, "onPoiSearched error");
                     return;
                 }
 
+                //获取搜索poi集合
+                List<PoiItem> poiList = poiResult.getPois();
 
-                //画出驾驶路径
+                int listnum = poiList.size();
+                for (int index = 0; index < listnum; index++) {
+                    PoiItem item = poiList.get(index);
 
-                //1 拿到得到的路径  (默认以第一个方案为优选方案)
-                DrivePath path = driveRouteResult.getPaths().get(0);
+                    Log.e(LogTag, index +
+                            " onPoiSearched  distance:"
+                            + item.getDistance() +
+                            " [AdName]: "
+                            + item.getAdName() +
+                            " [AdCode]: "
+                            + item.getAdCode() +
+                            " [AdBusinessArea]: "
+                            + item.getBusinessArea() +
+                            " [Direction]: "
+                            + item.getDirection() +
+                            " [Enter]: "
+                            + item.getEnter() +
+                            " [Title]: "
+                            + item.getTitle() +
+                            " [PoiId]: "
+                            + item.getPoiId());
+                }
+
+                /* 1. 取出第一个兴趣点 添加到 _endPoint中*/
+                PoiItem poi = poiList.get(0);
+                _endPoint = poi.getLatLonPoint();
+                // =========== 得到规划路线 ==========
+                // -------(1) 得到路线搜索句柄 ----------
+                RouteSearch routeSearch = new RouteSearch(getApplication());
+                // -------(2) 设置路径源点和目的坐标点
+                RouteSearch.FromAndTo ft = new RouteSearch.FromAndTo(_startPoint, _endPoint);
+
+                Log.e(LogTag, "StartPoint " + _startPoint.getLatitude() + ", " + _startPoint.getLongitude());
+                Log.e(LogTag, "EndPoint " + _endPoint.getLatitude() + ", " + _endPoint.getLongitude());
+                // fromAndTo包含路径规划的起点和终点，drivingMode表示驾车模式
+                // 第三个参数表示途经点（最多支持16个），
+                // 第四个参数表示避让区域（最多支持32个），第五个参数表示避让道路
+                // -------(3) 设置查询条件 -----------
+                RouteSearch.DriveRouteQuery driver_query
+                        = new RouteSearch.DriveRouteQuery(ft, RouteSearch.DrivingDefault, null, null, "");
+
+                // -------(4) 设置查询条件回调（主要在地图上绘图） -----------
+                routeSearch.setRouteSearchListener(new RouteSearch.OnRouteSearchListener() {
+                    @Override
+                    public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
+                        //公交查询路线规划完成
+                    }
+
+                    @Override
+                    public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int rCode) {
+                        //驾车查询路线规划完成
+                        Log.e(LogTag, "++++ calc end " + rCode);
+
+                        if (rCode != 1000) {
+                            Log.e(LogTag, "onDriveRouteSearched error rcode = " + rCode);
+                            return;
+                        }
+
+                        // 主要在地图上 描绘出路径
+                        // 首先清楚地图上之前绘图
+                        _amap.clear();
+
+                        //这里面可能会有很多种查询的路径，我们默认使用第一个driveRouteResult.getPaths().get(0)
+                        DrivePath drivePath = driveRouteResult.getPaths().get(0);
+                        //开始绘图 创建路径覆盖物
+                        DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(
+                                getApplication(),
+                                _amap,
+                                drivePath,
+                                _startPoint,
+                                _endPoint,
+                                null
+                        );
+
+                        //将路径中转图标去掉，否则影响视图效果
+                        drivingRouteOverlay.setNodeIconVisibility(false);
+
+                        //将路线覆盖物添加到地图中
+                        drivingRouteOverlay.removeFromMap();
+                        drivingRouteOverlay.addToMap();
+
+                        //以最适应的缩进展示效果
+                        drivingRouteOverlay.zoomToSpan();
+
+                        tv_passenger_info.setText("约" + driveRouteResult.getTaxiCost() + " 元");
+                        // drivePath.getDuration(); //时间
+
+                        bt_startOrder.setText("等待司机接单...");
+
+                        //给服务器发送请求下单消息
+                        _driverGet = OBOJNI.getInstance().StartOrder(_startPoint.getLongitude() + "",
+                                _startPoint.getLatitude() + "",
+                                _startAddr,
+                                _endPoint.getLongitude() + "",
+                                _endPoint.getLatitude() + "",
+                                _finalAddr,
+                                driveRouteResult.getTaxiCost() + "");
 
 
-                //驾驶路径一个覆盖物
-                DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(
-                        getApplicationContext(),
-                        _amap,
-                        path,
-                        _startPoint,
-                        _endPoint,
-                        null
-                );
-                //先把之前的路径删除掉
-                _amap.clear();
+                        Log.e(LogTag, "StartOrder: longitude:" + _startPoint.getLongitude() + ", latitude:" + _startPoint.getLatitude());
+                    }
 
-                //以适当的缩放显示路径
-                drivingRouteOverlay.zoomToSpan();
+                    @Override
+                    public void onWalkRouteSearched(WalkRouteResult walkRouteResult, int i) {
+                        //步行查询路线规划完成
+                    }
 
-                //去掉中间转弯的一些图标提示
-                drivingRouteOverlay.setNodeIconVisibility(false);
-                drivingRouteOverlay.setThroughPointIconVisibility(false);
+                    @Override
+                    public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
+                        //骑行查询路线规划完成
+                    }
+                });
 
-
-                //将路径添加到地图
-                drivingRouteOverlay.addToMap();
-
-
+                //--------(5) 启动路线规划查询
+                routeSearch.calculateDriveRouteAsyn(driver_query);
             }
+
 
             @Override
-            public void onWalkRouteSearched(WalkRouteResult walkRouteResult, int i) {
-                //步行的理业务
+            public void onPoiItemSearched(PoiItem poiItem, int i) {
+                //针对搜索 出每个PoiItem的回调
+
+                if (i != 1000) {
+                    Log.e(LogTag, "onPoiItemSearched error");
+                    return;
+                }
 
             }
 
-            @Override
-            public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
-                //骑行的理业务
-
-            }
         });
 
-        //3 启动路径所有 将query穿进去 向服务器发送请求
-        routeSearch.calculateDriveRouteAsyn(query);
+        //4 开始异步搜索
+        poiSearch.searchPOIAsyn();
+
+        /* ---------------  获取POI数据 (end)-----------------*/
     }
 
 
-    //绑定attv控件 自动搜索高德地图的兴趣点列表 自动弹出输入提示列表
-    protected void initAutoCompeleteTextView() {
-        //给attv控件设置一个阈值
-        _attv_dstAddr.setThreshold(1);
+    void setAutoCompleteAddress() {
 
-        //给autocompleteTextView绑定自动补齐功能
-        _attv_dstAddr.addTextChangedListener(new TextWatcher() {
+        //默认2个字才会开启匹配列表显示，这里改为1个字就开始显示
+        autotv_finalAddr.setThreshold(1);
+
+        autotv_finalAddr.addTextChangedListener(new TextWatcher() {
+            //控件内容 改变之前会触发此回调
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
 
+            //当ui控件的内容发生改变，会触发此回调
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //当文本内容发生改变的时候 调用此回调函数
+                //得到用户输入的 关键字
+                final String keyword = autotv_finalAddr.getText().toString().trim();
 
 
-                //从高德的服务器获取有关跟关键字匹配的poi名称的数据
-
-                //(1) 得到要搜索的关键字
-                final String keyword = _attv_dstAddr.getText().toString();
                 if (keyword == null || keyword.length() == 0) {
-                    Log.e(LogTag, "search keyword == null");
                     return;
                 }
 
-                //(2) 创建一个query 查询所有tips的条件
-                InputtipsQuery query = new InputtipsQuery(keyword, _city);
+                Log.e(LogTag, "乘客匹配到的模糊关键字是 :" + keyword);
 
-                //(3) 创建一个InputTips 查询句柄
+
+                /*
+                得到根据此模糊关键字搜索到的全部模糊匹配的地址 集合
+                此集合由高德地图提供，不需要我们自己写模糊算法
+                */
+
+                // 得到查询条件
+                InputtipsQuery query = new InputtipsQuery(keyword, _city);
+                // 得到查询点搜索句柄（实际上高德地图会根据 搜索关键字 来定位匹配的地址）
                 Inputtips search = new Inputtips(getApplicationContext(), query);
 
-                //(4) 给InputTips 设定回调函数
+                // 设置 定位监听回调
                 search.setInputtipsListener(new Inputtips.InputtipsListener() {
                     @Override
-                    public void onGetInputtips(List<Tip> list, int i) {
-                        if (i != 1000) {
-                            Log.e(LogTag, "search input tips error i = " + i);
-                            return;
-                        }
+                    public void onGetInputtips(List<Tip> list, int rCode) {
+                        // 高德地图会将全部定位到的 地址 放在list列表中，每个元素类型是Tip
 
+                        // 下面就是将全部的地址信息，放在我们的_autotv_keyword控件中
 
-                        // 1 应该从服务器获取能够匹配的 单词集合
-                        ArrayList<String> poiList = new ArrayList<String>();
+                        // 1 首先将Tip list信息封装到一个 ArrayList<String>中
 
-                        /*
-                        poiList.add("gailun");
-                        poiList.add("gailun1");
-                        poiList.add("gailun2");
-                        poiList.add("gailun3");
-                        poiList.add("gailun4");
-                        poiList.add("gailun5");
-                        */
-
-                        for (int index = 0; index < list.size(); index++) {
-                            Log.e(LogTag, "通过 " + keyword + "匹配到的tips 有 " + list.get(index).getName());
-                            poiList.add(list.get(index).getName());
+                        ArrayList<String> resultList = new ArrayList<String>();
+                        for (int i = 0; i < list.size(); i++) {
+                            resultList.add(list.get(i).getName());
+                            Log.e(LogTag, "根据\"" + keyword + "\"匹配到的结果:" + list.get(i).toString());
 
                         }
 
+                        // 2 创建一个根据ArrayList<String>的ArrayAdapter<String>
+                        ArrayAdapter<String> resultAdapter = new ArrayAdapter<String>(
+                                getApplicationContext(),
+                                android.R.layout.simple_list_item_1,
+                                resultList
+                        );
 
-                        // 2 给autoCompleteTextView 设置一个适配器Adapter
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(),
-                                android.R.layout.simple_list_item_1, poiList);
+                        // 3 将这个Adapter设置给AutoCompleteTextView控件
+                        autotv_finalAddr.setAdapter(resultAdapter);
 
-                        // 3 将Adapter  和 给autoCompleteTextView 相关联
-                        _attv_dstAddr.setAdapter(adapter);
-
-                        // 4 触发adapter 触发控件显示  单词集合
-                        adapter.notifyDataSetChanged();
+                        // 4 启动通知 ，一旦这个Adapter数据内容发生改变，告知控件
+                        resultAdapter.notifyDataSetChanged();
                     }
                 });
 
-                //(5) 开启InputTips 向服务器发送查询请求
+                // 开始 定位
                 search.requestInputtipsAsyn();
-
-
             }
 
+            //控件内容 改变之后会触发此回调
             @Override
             public void afterTextChanged(Editable s) {
 
             }
         });
+    }
+
+    // ============ 开启定位服务接口 ============
+    public void doLocation() {
+
+        /*--------------  定位接口操作（start） ------------ */
+
+        /*------1 获取客户端定位对象 ---- */
+        _amapLocationClient = new AMapLocationClient(getApplicationContext());
 
 
+        /*------2 配置定位属性 -------*/
+        //初始化AMapLocationClientOption对象
+        _amapLocationClientOption = new AMapLocationClientOption();
+
+        //设定持续定位
+        //设置定位间隔,单位毫秒,默认为2000ms，最低1000ms
+        _amapLocationClientOption.setInterval(2000);
+
+        //_amapLocationClientOption.setOnceLocation(true);
+
+        //给定位客户端对象设置定位参数
+        _amapLocationClient.setLocationOption(_amapLocationClientOption);
+
+
+
+        /* -----3 设置定位回调监听 ---- */
+        _amapLocationClient.setLocationListener(new AMapLocationListener() {
+            @Override
+            public void onLocationChanged(AMapLocation aMapLocation) {
+                if (aMapLocation != null) {
+                    if (aMapLocation.getErrorCode() == 0) {
+                        //可在其中解析amapLocation获取相应内容。
+
+                        //获取当前所属城市
+                        _city = aMapLocation.getCity();
+                        _startAddr = aMapLocation.getAddress();
+                        Log.e(LogTag, "address: " + _startAddr);
+
+                        //获取当前坐标
+                        if (_startPoint == null) {
+                            _startPoint = new LatLonPoint(0, 0);
+                        }
+
+                        _startPoint.setLatitude(aMapLocation.getLatitude());
+                        _startPoint.setLongitude(aMapLocation.getLongitude());
+
+
+                        //取出经纬度
+                        LatLng latLng = new LatLng(aMapLocation.getLatitude(),
+                                aMapLocation.getLongitude());
+
+                        //添加Marker显示定位位置
+                        if (locationMarker == null) {
+                            //如果是空的添加一个新的,icon方法就是设置定位图标，可以自定义
+                            locationMarker = _amap.addMarker(new MarkerOptions()
+                                    .position(latLng)
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.location_marker)));
+                        } else {
+                            //已经添加过了，修改位置即可
+                            locationMarker.setPosition(latLng);
+                        }
+
+                        // 以自我为中心 只执行一次
+                        if (postMyLocationCenter == true) {
+                            //得到当前坐标点
+                            CameraPosition cp = _amap.getCameraPosition();
+                            //然后可以移动到定位点,使用animateCamera就有动画效果
+                            _amap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, cp.zoom));
+                            postMyLocationCenter = false;
+                        }
+
+
+                        //开始上传乘客地理位置信息 locationChanged业务
+                        if (OBOJNI.getInstance().getStatus().toString().equals(getResources().getString(R.string.PASSENGER_STATUS_WAIT))) {
+
+                            OBOJNI.getInstance().PassengerLocationChanged(aMapLocation.getLongitude() + "",
+                                    aMapLocation.getLatitude() + "",
+                                    aMapLocation.getAddress() + "",
+                                    _endPoint.getLongitude() + "",
+                                    _endPoint.getLatitude() + "",
+                                    _finalAddr);
+                            _driverGet = false;
+                        } else {
+
+                            OBOJNI.getInstance().PassengerLocationChanged(aMapLocation.getLongitude() + "",
+                                    aMapLocation.getLatitude() + "",
+                                    aMapLocation.getAddress() + "",
+                                    "",
+                                    "",
+                                    "");
+                        }
+
+                        //设置乘客按钮文本
+                        if (OBOJNI.getInstance().getStatus().toString().equals(getString(R.string.PASSENGER_STATUS_IDLE))) {
+                            if (_driverGet == false) {
+                                bt_startOrder.setText("开始约车");
+                            } else {
+                                bt_startOrder.setText("等待司机接单...");
+                            }
+                        } else if (OBOJNI.getInstance().getStatus().toString().equals(getString(R.string.PASSENGER_STATUS_WAIT))) {
+                            bt_startOrder.setText("司机已经接单,等待司机...");
+                        } else if (OBOJNI.getInstance().getStatus().toString().equals(getString(R.string.PASSENGER_STATUS_TRAVEL))) {
+                            bt_startOrder.setText("司机已确认上车,正在行驶中...");
+                        }
+
+
+                    } else {
+                        //定位失败时，可通过ErrCode（错误码）信息来确定失败的原因，errInfo是错误信息，详见错误码表。
+                        Log.e(LogTag, "location Error, ErrCode:"
+                                + aMapLocation.getErrorCode() + ", errInfo:"
+                                + aMapLocation.getErrorInfo());
+                    }
+                }
+            }
+        });
+
+
+
+        /*--- 4 启动定位---*/
+        _amapLocationClient.startLocation();
     }
 
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        _mapView.onResume();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        _mapView.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        _mapView.onSaveInstanceState(outState);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        _mapView.onDestroy();
+        _amapLocationClient.stopLocation();
+    }
 }

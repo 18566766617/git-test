@@ -68,15 +68,17 @@ public class OBOJNI {
 
 
     public native boolean FinishOrder();
-    public native void setStatus(String status);
-    public native String getOrderid();
+
     public native String getSessionid();
-    public native String getStatus();
+    public native String getOrderid();
     public native String getIsDriver();
+    public native void setStatus(String status);
+    public native String getStatus();
     public native String getPtempLongitude();
     public native String getPtempLatitude();
     public native String getDtempLongitude();
     public native String getDtempLatitude();
+
     public native void testLibcurl();
 
 
