@@ -55,19 +55,65 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_StartOrder
 //    url += ":";
 //    url += OBO_SERVER_PORT;
 //    url += "/startSetOrder";
-//
-//    char url[50] = {0};
-//    sprintf(url, "%s:%s/reg", OBO_SERVER_IP, OBO_SERVER_PORT);
-//    __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "JNI-reg: uri = [%s]", url);
+
+    char url[50] = {0};
+    sprintf(url, "%s:%s/startSetOrder", OBO_SERVER_IP, OBO_SERVER_PORT);
+    __android_log_print(ANDROID_LOG_ERROR, jniLogTag, "JNI-reg: uri = [%s]", url);
 
 
 
-//    Curl curl(url, true);
+    Curl curl(url, true);
+
+    if (curl.execute(json_str) == false) {
+        JNIINFO("%s", "curl execute error")
+        return JNI_FALSE;
+    }
+
+    /*
+     ====得到服务器响应数据 ====
+     //成功
+     {
+            result: "ok",
+            recode: "0",
+            orderid: "orderid-xxxx-xxx-xxx-xxx-xxxx"
+     }
+     //失败
+     {
+            result: "error",
+            recode: "1", //1 代表session失效，需要重新登录
+                         //2 代表服务器发生错误
+                         //3 附近没有司机可用
+            reason: "why...."
+     }
+     * */
 
 
-//    if (curl.execute(json_str) == false) {
-//        JNIINFO("%s", "curl execute error")
-//        return JNI_FALSE;
-//    }
-    return JNI_FALSE;
+    string response_data = curl.responseData();
+    Json json_response;
+    json_response.parse(curl.responseData());
+
+    string result = json_response.value("result");
+    if (result.length() != 0) {
+        if (result == "ok") {
+
+            string recode = json_response.value("recode");
+            if (recode == "0") {
+                Data::getInstance()->setOrderid(json_response.value("ordierid"));
+                JNIINFO("start-order succ, orderid=%s", Data::getInstance()->getOrderid().c_str());
+                return JNI_TRUE;
+            }
+            else if (recode == "3") {
+                JNIINFO("%s", "waiting driver...");
+                return JNI_FALSE;
+            }
+
+        }
+        else {
+            JNIINFO("ret error data= %s", response_data.c_str());
+            return JNI_FALSE;
+        }
+    }
+
+
+    return JNI_TRUE;
 }

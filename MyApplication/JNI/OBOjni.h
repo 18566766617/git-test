@@ -37,7 +37,7 @@
 
 
 #define jniLogTag           "tag"
-#define OBO_SERVER_IP       "https://192.168.0.5"
+#define OBO_SERVER_IP       "https://192.168.0.4"
 #define OBO_SERVER_PORT     "7777"
 
 #define RESPONSE_DATA_LEN   (4096)
