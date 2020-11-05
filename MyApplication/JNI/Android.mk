@@ -18,7 +18,7 @@ include $(CLEAR_VARS)
 # 编译的目标
 LOCAL_MODULE := OBOjni
 # 参与编译的文件
-LOCAL_SRC_FILES :=test.cpp login.cpp cJSON.cpp Json.cpp reg.cpp Curl.cpp Data.cpp StartOrder.cpp PassengerLocationChanged.cpp
+LOCAL_SRC_FILES :=test.cpp login.cpp cJSON.cpp Json.cpp reg.cpp Curl.cpp Data.cpp StartOrder.cpp PassengerLocationChanged.cpp DriverLocationChanged.cpp FinishOrder.cpp
 # 添加其他动态库
 LOCAL_LDLIBS := -llog -lz
 # 添加依赖的静态库

@@ -75,8 +75,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_StartOrder
      {
             result: "ok",
             recode: "0",
-            orderid: "orderid-xxxx-xxx-xxx-xxx-xxxx"
-     }
+    }
      //失败
      {
             result: "error",
@@ -98,19 +97,19 @@ JNIEXPORT jboolean JNICALL Java_com_example_myapplication_OBOJNI_StartOrder
 
             string recode = json_response.value("recode");
             if (recode == "0") {
-                Data::getInstance()->setOrderid(json_response.value("ordierid"));
-                JNIINFO("start-order succ, orderid=%s", Data::getInstance()->getOrderid().c_str());
-                return JNI_TRUE;
+//                Data::getInstance()->setOrderid(json_response.value("ordierid"));
+//                JNIINFO("start-order succ, orderid=%s", Data::getInstance()->getOrderid().c_str());
+                JNIINFO("%s", "附近有司机，订单已给司机，等待司机接单");
             }
-            else if (recode == "3") {
-                JNIINFO("%s", "waiting driver...");
-                return JNI_FALSE;
-            }
-
+            return JNI_TRUE;
         }
         else {
-            JNIINFO("ret error data= %s", response_data.c_str());
-            return JNI_FALSE;
+             string recode = json_response.value("recode");
+             if (recode == "3") {
+                 JNIINFO("%s", "附近没有司机");
+
+             }
+             return JNI_FALSE;
         }
     }
 
